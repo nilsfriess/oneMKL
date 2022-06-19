@@ -22,7 +22,7 @@ jobs:
         wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
         echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/${{matrix.rocm_version}}/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
         sudo apt update
-        sudo apt install rocm-dev
+        sudo apt install rocm-dev rocblas
     - name: install LLVM
       run: |
         wget https://apt.llvm.org/llvm.sh
@@ -47,11 +47,13 @@ jobs:
         wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18236/l_BaseKit_p_2021.4.0.3422.sh
         bash l_BaseKit_p_2021.4.0.3422.sh -a --action install -s --eula accept --components=intel.oneapi.lin.tbb.devel:intel.oneapi.lin.mkl.devel --install-dir /opt/intel/ --download-dir /opt/intel/dw/ --download-cache /opt/intel/dw/ --package-path /opt/intel/intel
     - name: clone and build oneMKL
+      env:
+        rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/ 
       run: |
         cd
         git clone https://github.com/oneapi-src/oneMKL.git
         cd oneMKL
         mkdir build
         cd build
-        rocblas_DIR=/opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/ cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKL_GPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL -DROCM_ROOT=/opt/rocm-${{matrix.rocm_version}}/ ..
+        cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKL_GPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL -DROCM_ROOT=/opt/rocm-${{matrix.rocm_version}}/ ..
         
