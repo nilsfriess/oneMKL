@@ -48,7 +48,8 @@ jobs:
         bash l_BaseKit_p_2021.4.0.3422.sh -a --action install -s --eula accept --components=intel.oneapi.lin.tbb.devel:intel.oneapi.lin.mkl.devel --install-dir /opt/intel/ --download-dir /opt/intel/dw/ --download-cache /opt/intel/dw/ --package-path /opt/intel/intel
     - name: clone and build oneMKL
       env:
-        rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/ 
+        rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/
+        hip_DIR: /opt/rocm-5.1.1/lib/cmake/hip/
       run: |
         cd
         git clone https://github.com/oneapi-src/oneMKL.git
