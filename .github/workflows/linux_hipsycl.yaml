@@ -48,7 +48,7 @@ jobs:
         bash l_BaseKit_p_2021.4.0.3422.sh -a --action install -s --eula accept --components=intel.oneapi.lin.tbb.devel:intel.oneapi.lin.mkl.devel --install-dir /opt/intel/ --download-dir /opt/intel/dw/ --download-cache /opt/intel/dw/ --package-path /opt/intel/intel
     - name: install CBLAS
       run: |
-        sudo apt install libcblas-dev        
+        sudo apt install libatlas-base-dev    
     - name: clone and build oneMKL
       env:
         rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/
