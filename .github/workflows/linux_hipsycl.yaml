@@ -23,13 +23,6 @@ jobs:
         echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/${{matrix.rocm_version}}/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
         sudo apt update
         sudo apt install rocm-dev
-    - name: install CUDA 11.0
-      if: matrix.cuda == 11.0
-      run: |
-        mkdir -p /opt/hipSYCL/cuda
-        wget -q -O cuda.sh http://developer.download.nvidia.com/compute/cuda/11.0.2/local_installers/cuda_11.0.2_450.51.05_linux.run
-        sudo sh ./cuda.sh --override --silent --toolkit --no-man-page --no-drm --no-opengl-libs --installpath=/opt/hipSYCL/cuda || true
-        echo "CUDA Version 11.0.0" | sudo tee /opt/hipSYCL/cuda/version.txt
     - name: install LLVM
       run: |
         wget https://apt.llvm.org/llvm.sh
@@ -45,10 +38,10 @@ jobs:
         git clone https://github.com/illuhad/hipSYCL.git
         cd hipSYCL
         mkdir build && cd build
-        cmake -DCMAKE_CXX_COMPILER=/usr/bin/clang++-${{matrix.clang_version}} -DCLANG_EXECUTABLE_PATH=/usr/bin/clang++-${{matrix.clang_version}} -DLLVM_DIR=/usr/lib/llvm-${{matrix.clang_version}}/cmake -DWITH_CUDA_BACKEND=ON -DWITH_ROCM_BACKEND=ON -DWITH_LEVEL_ZERO_BACKEND=OFF -DCMAKE_INSTALL_PREFIX=`pwd`/install -DCUDA_TOOLKIT_ROOT_DIR=/opt/hipSYCL/cuda -DROCM_PATH=/opt/rocm ..
-        make -j2 install
-        cp /opt/hipSYCL/cuda/lib64/stubs/libcuda.so `pwd`/install/lib/libcuda.so
-        cp /opt/hipSYCL/cuda/lib64/stubs/libcuda.so `pwd`/install/lib/libcuda.so.1
+        cmake -DCMAKE_CXX_COMPILER=/usr/bin/clang++-${{matrix.clang_version}} -DCLANG_EXECUTABLE_PATH=/usr/bin/clang++-${{matrix.clang_version}} -DLLVM_DIR=/usr/lib/llvm-${{matrix.clang_version}}/cmake -DWITH_CUDA_BACKEND=OFF -DWITH_ROCM_BACKEND=ON -DWITH_LEVEL_ZERO_BACKEND=OFF -DCMAKE_INSTALL_PREFIX=/opt/hipSYCL -DROCM_PATH=/opt/rocm-${{matrix.rocm_version}} ..
+        make -j4 install
+        # cp /opt/hipSYCL/cuda/lib64/stubs/libcuda.so `pwd`/install/lib/libcuda.so
+        # cp /opt/hipSYCL/cuda/lib64/stubs/libcuda.so `pwd`/install/lib/libcuda.so.1
     - name: install TBB and MKL
       run: |
         wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18236/l_BaseKit_p_2021.4.0.3422.sh
@@ -60,5 +53,5 @@ jobs:
         cd oneMKL
         mkdir build
         cd build
-        cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKL_GPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL -DROCM_ROOT=/opt/rocm/ ..
+        cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKL_GPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL -DROCM_ROOT=/opt/rocm-${{matrix.rocm_version}}/ ..
         
