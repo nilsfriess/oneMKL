@@ -51,6 +51,7 @@ jobs:
         rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/
         hip_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/hip/
         AMDDeviceLibs_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/AMDDeviceLibs/
+        amd_comgr_DIR: /opt/rocm-5.1.1/lib/cmake/amd_comgr/
       run: |
         cd
         git clone https://github.com/oneapi-src/oneMKL.git
