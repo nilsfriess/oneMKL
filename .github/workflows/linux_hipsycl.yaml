@@ -46,9 +46,14 @@ jobs:
       run: |
         wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18236/l_BaseKit_p_2021.4.0.3422.sh
         bash l_BaseKit_p_2021.4.0.3422.sh -a --action install -s --eula accept --components=intel.oneapi.lin.tbb.devel:intel.oneapi.lin.mkl.devel --install-dir /opt/intel/ --download-dir /opt/intel/dw/ --download-cache /opt/intel/dw/ --package-path /opt/intel/intel
-    - name: install CBLAS
+    - name: install LAPACK
       run: |
-        sudo apt install libatlas-base-dev    
+        cd
+        git clone https://github.com/Reference-LAPACK/lapack.git
+        cd lapack
+        mkdir build && cd build
+        cmake -DCMAKE_INSTALL_LIBDIR=opt/lapack -DBUILD_SHARED_LIBS=ON -DCBLAS=ON ..
+        cmake --build . -j --target install
     - name: clone and build oneMKL
       env:
         rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/
