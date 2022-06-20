@@ -52,7 +52,7 @@ jobs:
         git clone https://github.com/Reference-LAPACK/lapack.git
         cd lapack
         mkdir build && cd build
-        cmake -DCMAKE_INSTALL_LIBDIR=opt/lapack -DBUILD_SHARED_LIBS=ON -DCBLAS=ON ..
+        cmake -DCMAKE_INSTALL_LIBDIR=/opt/lapack -DBUILD_SHARED_LIBS=ON -DCBLAS=ON ..
         cmake --build . -j --target install
     - name: clone and build oneMKL
       env:
@@ -67,7 +67,7 @@ jobs:
         cd oneMKL
         mkdir build
         cd build
-        cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKLGPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL ..
+        cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKLGPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL -DREF_BLAS_ROOT=/opt/lapack/ ..
         make -j8
     - name: Run oneMKL tests
       run: |
