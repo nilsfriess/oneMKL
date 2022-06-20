@@ -63,6 +63,7 @@ jobs:
         mkdir build
         cd build
         cmake -DENABLE_CUBLAS_BACKEND=False -DENABLE_MKLGPU_BACKEND=False -DENABLE_NETLIB_BACKEND=False -DENABLE_ROCBLAS_BACKEND=True -DTARGET_DOMAINS=blas -DMKL_ROOT=/opt/intel/mkl/latest/ -DHIPSYCL_TARGETS=omp\;hip:gfx906 -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL ..
+        make -j8
     - name: Run oneMKL tests
       run: |
         cd /home/runner/oneMKL
