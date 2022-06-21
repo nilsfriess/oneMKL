@@ -32,6 +32,7 @@ jobs:
     - name: install boost
       if: matrix.os == 'ubuntu-20.04'
       run: |
+        sudo apt update
         sudo apt install libboost-all-dev
     - name: build hipSYCL
       run: |
