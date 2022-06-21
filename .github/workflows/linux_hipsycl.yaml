@@ -71,7 +71,7 @@ jobs:
         cmake -DENABLE_CUBLAS_BACKEND=False \
               -DENABLE_MKLGPU_BACKEND=False \
               -DENABLE_MKLCPU_BACKEND=False \
-              -DENABLE_MKLCPU_THREAD_TBB \
+              -DENABLE_MKLCPU_THREAD_TBB=False \
               -DENABLE_NETLIB_BACKEND=False \
               -DENABLE_ROCBLAS_BACKEND=True \
               -DTARGET_DOMAINS=blas \
