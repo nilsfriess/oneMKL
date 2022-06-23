@@ -9,7 +9,7 @@ jobs:
       matrix:
         clang_version: [13]
         rocm_version: ['5.1.1']
-        os: [ubuntu-20.04]
+        os: [ubuntu-20.04, ubuntu-22.04]
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2
