@@ -10,7 +10,6 @@ jobs:
         clang_version: [13]
         rocm_version: ['5.1.1']
         os: [ubuntu-20.04]
-        cuda: [11.0]
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2
@@ -39,14 +38,15 @@ jobs:
         git clone https://github.com/illuhad/hipSYCL.git
         cd hipSYCL
         mkdir build && cd build
-        cmake -DCMAKE_CXX_COMPILER=/usr/bin/clang++-${{matrix.clang_version}} -DCLANG_EXECUTABLE_PATH=/usr/bin/clang++-${{matrix.clang_version}} -DLLVM_DIR=/usr/lib/llvm-${{matrix.clang_version}}/cmake -DWITH_CUDA_BACKEND=OFF -DWITH_ROCM_BACKEND=ON -DWITH_LEVEL_ZERO_BACKEND=OFF -DCMAKE_INSTALL_PREFIX=/opt/hipSYCL -DROCM_PATH=/opt/rocm-${{matrix.rocm_version}} ..
+        cmake -DCMAKE_CXX_COMPILER=/usr/bin/clang++-${{matrix.clang_version}} \
+              -DCLANG_EXECUTABLE_PATH=/usr/bin/clang++-${{matrix.clang_version}} \
+              -DLLVM_DIR=/usr/lib/llvm-${{matrix.clang_version}}/cmake \
+              -DWITH_CUDA_BACKEND=OFF \
+              -DWITH_ROCM_BACKEND=ON \
+              -DWITH_LEVEL_ZERO_BACKEND=OFF \
+              -DCMAKE_INSTALL_PREFIX=/opt/hipSYCL \
+              -DROCM_PATH=/opt/rocm-${{matrix.rocm_version}} ..
         make -j4 install
-        # cp /opt/hipSYCL/cuda/lib64/stubs/libcuda.so `pwd`/install/lib/libcuda.so
-        # cp /opt/hipSYCL/cuda/lib64/stubs/libcuda.so `pwd`/install/lib/libcuda.so.1
-    # - name: install TBB and MKL
-    #   run: |
-    #     wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18236/l_BaseKit_p_2021.4.0.3422.sh
-    #     bash l_BaseKit_p_2021.4.0.3422.sh -a --action install -s --eula accept --components=intel.oneapi.lin.tbb.devel:intel.oneapi.lin.mkl.devel --install-dir /opt/intel/ --download-dir /opt/intel/dw/ --download-cache /opt/intel/dw/ --package-path /opt/intel/intel
     - name: install LAPACK (for CBLAS)
       run: |
         cd
@@ -71,7 +71,6 @@ jobs:
         cmake -DENABLE_CUBLAS_BACKEND=False \
               -DENABLE_MKLGPU_BACKEND=False \
               -DENABLE_MKLCPU_BACKEND=False \
-              -DENABLE_MKLCPU_THREAD_TBB=False \
               -DENABLE_NETLIB_BACKEND=False \
               -DENABLE_ROCBLAS_BACKEND=True \
               -DTARGET_DOMAINS=blas \
@@ -79,7 +78,4 @@ jobs:
               -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
               -DREF_BLAS_ROOT=/opt/lapack/ ..
         make -j8
-    - name: Run oneMKL tests
-      run: |
-        cd /home/runner/oneMKL
         
