@@ -61,10 +61,13 @@
 #else
 #include <CL/sycl.hpp>
 #endif
+#ifndef __HIPSYCL__
 #include <CL/sycl/backend/cuda.hpp>
+#endif
 #include <iostream>
 
 #include "curand_helper.hpp"
+#include "curand_task.hpp"
 #include "oneapi/mkl/exceptions.hpp"
 #include "oneapi/mkl/rng/detail/curand/onemkl_rng_curand.hpp"
 #include "oneapi/mkl/rng/detail/engine_impl.hpp"
@@ -104,9 +107,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<float*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](float* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateUniform, status, engine_, r_ptr, n);
                 });
@@ -121,9 +122,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<double*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](double* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateUniformDouble, status, engine_, r_ptr, n);
                 });
@@ -139,11 +138,9 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = ib.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto ib_ptr = reinterpret_cast<std::uint32_t*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](std::uint32_t* r_ptr) {
                     curandStatus_t status;
-                    CURAND_CALL(curandGenerate, status, engine_, ib_ptr, n);
+                    CURAND_CALL(curandGenerate, status, engine_, r_ptr, n);
                 });
             })
             .wait_and_throw();
@@ -156,9 +153,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<float*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](float* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateUniform, status, engine_, r_ptr, n);
                 });
@@ -173,9 +168,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<double*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](double* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateUniformDouble, status, engine_, r_ptr, n);
                 });
@@ -190,9 +183,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<float*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](float* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateNormal, status, engine_, r_ptr, n, distr.mean(),
                                 distr.stddev());
@@ -207,9 +198,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<double*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](double* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateNormalDouble, status, engine_, r_ptr, n, distr.mean(),
                                 distr.stddev());
@@ -240,9 +229,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<float*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](float* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateLogNormal, status, engine_, r_ptr, n, distr.m(),
                                 distr.s());
@@ -257,9 +244,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<double*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](double* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerateLogNormalDouble, status, engine_, r_ptr, n, distr.m(),
                                 distr.s());
@@ -317,9 +302,7 @@ public:
         queue_
             .submit([&](sycl::handler& cgh) {
                 auto acc = r.template get_access<sycl::access::mode::read_write>(cgh);
-                cgh.host_task([=](sycl::interop_handle ih) {
-                    auto r_ptr = reinterpret_cast<std::uint32_t*>(
-                        ih.get_native_mem<sycl::backend::ext_oneapi_cuda>(acc));
+                onemkl_curand_host_task(cgh, acc, [=](std::uint32_t* r_ptr) {
                     curandStatus_t status;
                     CURAND_CALL(curandGenerate, status, engine_, r_ptr, n);
                 });
