@@ -59,9 +59,9 @@
 find_package(CUDA 10.0 REQUIRED)
 get_filename_component(SYCL_BINARY_DIR ${CMAKE_CXX_COMPILER} DIRECTORY)
 
-if (NOT (ONEMKL_SYCL_IMPLEMENTATION STREQUAL "hipsycl"))
 # the OpenCL include file from cuda is opencl 1.1 and it is not compatible with DPC++
 # the OpenCL include headers 1.2 onward is required. This is used to bypass NVIDIA OpenCL headers
+if (NOT (ONEMKL_SYCL_IMPLEMENTATION STREQUAL "hipsycl"))
 find_path(OPENCL_INCLUDE_DIR CL/cl.h OpenCL/cl.h 
 HINTS 
 ${OPENCL_INCLUDE_DIR}
@@ -76,39 +76,40 @@ find_package(Threads REQUIRED)
 
 include(FindPackageHandleStandardArgs)
 
+# hipSYCL does not need openCL
 if (ONEMKL_SYCL_IMPLEMENTATION STREQUAL "hipsycl")
 find_package_handle_standard_args(cuRAND
     REQUIRED_VARS
-	CUDA_TOOLKIT_INCLUDE
-	CUDA_curand_LIBRARY
-        CUDA_LIBRARIES
-        CUDA_CUDA_LIBRARY
+   	CUDA_TOOLKIT_INCLUDE
+	  CUDA_curand_LIBRARY
+    CUDA_LIBRARIES
+    CUDA_CUDA_LIBRARY
 )
 
-  if(NOT TARGET ONEMKL::cuRAND::cuRAND)
-  add_library(ONEMKL::cuRAND::cuRAND SHARED IMPORTED)
-  set_target_properties(ONEMKL::cuRAND::cuRAND PROPERTIES
+if(NOT TARGET ONEMKL::cuRAND::cuRAND)
+add_library(ONEMKL::cuRAND::cuRAND SHARED IMPORTED)
+set_target_properties(ONEMKL::cuRAND::cuRAND PROPERTIES
     IMPORTED_LOCATION ${CUDA_curand_LIBRARY}
     INTERFACE_INCLUDE_DIRECTORIES "${CUDA_TOOLKIT_INCLUDE}"
     INTERFACE_LINK_LIBRARIES "Threads::Threads;${CUDA_CUDA_LIBRARY};${CUDA_LIBRARIES}"
-  )
-  endif()
+)
+endif()
 else()
 find_package_handle_standard_args(cuRAND
     REQUIRED_VARS
-	CUDA_TOOLKIT_INCLUDE
-	CUDA_curand_LIBRARY
-        CUDA_LIBRARIES
-        CUDA_CUDA_LIBRARY
-        OPENCL_INCLUDE_DIR
+	  CUDA_TOOLKIT_INCLUDE
+	  CUDA_curand_LIBRARY
+    CUDA_LIBRARIES
+    CUDA_CUDA_LIBRARY
+    OPENCL_INCLUDE_DIR
 )
 
-  if(NOT TARGET ONEMKL::cuRAND::cuRAND)
-  add_library(ONEMKL::cuRAND::cuRAND SHARED IMPORTED)
-  set_target_properties(ONEMKL::cuRAND::cuRAND PROPERTIES
+if(NOT TARGET ONEMKL::cuRAND::cuRAND)
+add_library(ONEMKL::cuRAND::cuRAND SHARED IMPORTED)
+set_target_properties(ONEMKL::cuRAND::cuRAND PROPERTIES
     IMPORTED_LOCATION ${CUDA_curand_LIBRARY}
     INTERFACE_INCLUDE_DIRECTORIES "${OPENCL_INCLUDE_DIR};${CUDA_TOOLKIT_INCLUDE}"
     INTERFACE_LINK_LIBRARIES "Threads::Threads;${CUDA_CUDA_LIBRARY};${CUDA_LIBRARIES}"
-  )
-  endif()
+)
+endif()
 endif()
