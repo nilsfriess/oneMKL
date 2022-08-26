@@ -36,7 +36,7 @@ static inline void host_task_internal(H &cgh, A acc, F f) {
 }
 
 template <typename H, typename F>
-static inline void host_task_internal(H &cgh, A acc, F f) {
+static inline void host_task_internal(H &cgh, F f) {
     cgh.host_task([f](sycl::interop_handle ih) { f(ih); });
 }
 #endif
