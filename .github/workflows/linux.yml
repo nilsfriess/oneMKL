@@ -15,6 +15,11 @@ jobs:
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'
+    - name: install CUDA
+      run: |
+        mkdir -p /opt/cuda
+        wget -q -O cuda.sh http://developer.download.nvidia.com/compute/cuda/11.0.2/local_installers/cuda_11.0.2_450.51.05_linux.run
+        sudo sh ./cuda.sh --override --silent --toolkit --no-man-page --no-drm --no-opengl-libs --installpath=/opt/cuda
     - name: install ROCm
       run: |
         sudo apt install libnuma-dev cmake unzip
@@ -52,11 +57,12 @@ jobs:
         cmake -DCMAKE_CXX_COMPILER=/usr/bin/clang++-${{matrix.clang_version}} \
               -DCLANG_EXECUTABLE_PATH=/usr/bin/clang++-${{matrix.clang_version}} \
               -DLLVM_DIR=/usr/lib/llvm-${{matrix.clang_version}}/cmake \
-              -DWITH_CUDA_BACKEND=OFF \
+              -DWITH_CUDA_BACKEND=ON \
               -DWITH_ROCM_BACKEND=ON \
               -DWITH_LEVEL_ZERO_BACKEND=OFF \
               -DCMAKE_INSTALL_PREFIX=/opt/hipSYCL \
-              -DROCM_PATH=/opt/rocm-${{matrix.rocm_version}} ..
+              -DROCM_PATH=/opt/rocm-${{matrix.rocm_version}}
+              -DCUDA_TOOLKIT_ROOT_DIR=/opt/cuda ..
         make -j4 install
     - name: install LAPACK (for CBLAS)
       run: |
@@ -66,7 +72,7 @@ jobs:
         mkdir build && cd build
         cmake -DCMAKE_INSTALL_LIBDIR=/opt/lapack -DBUILD_SHARED_LIBS=ON -DCBLAS=ON ..
         sudo cmake --build . -j --target install
-    - name: clone and build oneMKL
+    - name: clone and build oneMKL with ROCBLAS backend
       env:
         rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/
         hip_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/hip/
@@ -86,6 +92,23 @@ jobs:
               -DENABLE_ROCBLAS_BACKEND=True \
               -DTARGET_DOMAINS=blas \
               -DHIPSYCL_TARGETS=omp\;hip:gfx906 \
+              -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
+              -DREF_BLAS_ROOT=/opt/lapack/ ..
+        make -j8
+    - name: clone and build oneMKL with CUBLAS backend
+      run: |
+        cd
+        git clone https://github.com/oneapi-src/oneMKL.git
+        cd oneMKL
+        mkdir build
+        cd build
+        cmake -DENABLE_CUBLAS_BACKEND=True \
+              -DENABLE_MKLGPU_BACKEND=False \
+              -DENABLE_MKLCPU_BACKEND=False \
+              -DENABLE_NETLIB_BACKEND=False \
+              -DENABLE_ROCBLAS_BACKEND=False \
+              -DTARGET_DOMAINS=blas \
+              -DHIPSYCL_TARGETS=cuda:sm_75 \
               -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
               -DREF_BLAS_ROOT=/opt/lapack/ ..
         make -j8
