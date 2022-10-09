@@ -98,6 +98,7 @@ jobs:
     - name: clone and build oneMKL with CUBLAS backend
       run: |
         cd
+        rm -rf oneMKL
         git clone https://github.com/oneapi-src/oneMKL.git
         cd oneMKL
         mkdir build
