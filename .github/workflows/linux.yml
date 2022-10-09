@@ -72,6 +72,24 @@ jobs:
         mkdir build && cd build
         cmake -DCMAKE_INSTALL_LIBDIR=/opt/lapack -DBUILD_SHARED_LIBS=ON -DCBLAS=ON ..
         sudo cmake --build . -j --target install
+    - name: clone and build oneMKL with CUBLAS backend
+      run: |
+        cd
+        rm -rf oneMKL
+        git clone https://github.com/oneapi-src/oneMKL.git
+        cd oneMKL
+        mkdir build
+        cd build
+        cmake -DENABLE_CUBLAS_BACKEND=True \
+              -DENABLE_MKLGPU_BACKEND=False \
+              -DENABLE_MKLCPU_BACKEND=False \
+              -DENABLE_NETLIB_BACKEND=False \
+              -DENABLE_ROCBLAS_BACKEND=False \
+              -DTARGET_DOMAINS=blas \
+              -DHIPSYCL_TARGETS=cuda:sm_75 \
+              -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
+              -DREF_BLAS_ROOT=/opt/lapack/ ..
+        make -j8
     - name: clone and build oneMKL with ROCBLAS backend
       env:
         rocblas_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/rocblas/
@@ -95,22 +113,4 @@ jobs:
               -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
               -DREF_BLAS_ROOT=/opt/lapack/ ..
         make -j8
-    - name: clone and build oneMKL with CUBLAS backend
-      run: |
-        cd
-        rm -rf oneMKL
-        git clone https://github.com/oneapi-src/oneMKL.git
-        cd oneMKL
-        mkdir build
-        cd build
-        cmake -DENABLE_CUBLAS_BACKEND=True \
-              -DENABLE_MKLGPU_BACKEND=False \
-              -DENABLE_MKLCPU_BACKEND=False \
-              -DENABLE_NETLIB_BACKEND=False \
-              -DENABLE_ROCBLAS_BACKEND=False \
-              -DTARGET_DOMAINS=blas \
-              -DHIPSYCL_TARGETS=cuda:sm_75 \
-              -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
-              -DREF_BLAS_ROOT=/opt/lapack/ ..
-        make -j8
-        
+    
