@@ -75,12 +75,12 @@ jobs:
     - name: clone and build oneMKL with CUBLAS backend
       run: |
         cd
-        rm -rf oneMKL
         git clone https://github.com/oneapi-src/oneMKL.git
         cd oneMKL
         mkdir build
         cd build
-        cmake -DENABLE_CUBLAS_BACKEND=True \
+        cmake -DCMAKE_LIBRARY_PATH="/opt/cuda/lib64/stubs \
+              -DENABLE_CUBLAS_BACKEND=True \
               -DENABLE_MKLGPU_BACKEND=False \
               -DENABLE_MKLCPU_BACKEND=False \
               -DENABLE_NETLIB_BACKEND=False \
@@ -99,6 +99,7 @@ jobs:
         hsa-runtime64_DIR: /opt/rocm-${{matrix.rocm_version}}/lib/cmake/hsa-runtime64/
       run: |
         cd
+        rm -rf oneMKL
         git clone https://github.com/oneapi-src/oneMKL.git
         cd oneMKL
         mkdir build
