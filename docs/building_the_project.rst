@@ -38,14 +38,14 @@ Build Setup with hipSYCL
    `hipSYCL installation readme <https://github.com/illuhad/hipSYCL/blob/develop/doc/installing.md#software-dependencies>`_.
 
 #. 
-   Install hipSYCL with the prefered backends enabled. hipSYCL supports
+   Install hipSYCL with the preferred backends enabled. hipSYCL supports
    various backends. You can customize support for the target system at
    compile time by setting the appropriate configuration flags; see the
    `hipSYCL documentation <https://github.com/illuhad/hipSYCL/blob/develop/doc/installing.md>`_
    for instructions.
 
 #. 
-   Install `AMD rocBLAS <https://rocblas.readthedocs.io/en/master/install.html>`_.
+   If you are planning to use the BLAS backend with AMD GPUs, install `AMD rocBLAS <https://rocblas.readthedocs.io/en/master/install.html>`_.
 
 #. 
    Clone this project to ``<path to onemkl>``, where ``<path to onemkl>`` is
@@ -310,7 +310,7 @@ Building for oneMKL
      ctest
      cmake --install . --prefix <path_to_install_dir>
 
-Building for CUDA
+Building for CUDA (with clang++)
 ^^^^^^^^^^^^^^^^^
 
 * On Linux*
@@ -327,6 +327,41 @@ With the cuBLAS backend:
             -DENABLE_MKLCPU_BACKEND=False                                  # disable Intel MKL CPU backend
             -DENABLE_MKLGPU_BACKEND=False                                  # disable Intel MKL GPU backend
             [-DREF_BLAS_ROOT=<reference_blas_install_prefix>]              # required only for testing
+   cmake --build .
+   ctest
+   cmake --install . --prefix <path_to_install_dir>
+
+To build with the cuRAND backend instead simply replace:
+
+.. code-block:: bash
+
+   -DENABLE_CUBLAS_BACKEND=True   \
+
+With:
+
+.. code-block:: bash
+
+   -DENABLE_CURAND_BACKEND=True   \
+
+Building for CUDA (with hipSYCL)
+^^^^^^^^^^^^^^^^^
+
+* On Linux*
+
+With the cuBLAS backend:
+
+.. code-block:: bash
+
+   # Inside <path to onemkl>
+   mkdir build && cd build
+   cmake .. -DENABLE_CUBLAS_BACKEND=True \
+            -DENABLE_MKLGPU_BACKEND=False                                # Disable all backends except for cuBLAS
+            -DENABLE_MKLCPU_BACKEND=False \
+            -DENABLE_NETLIB_BACKEND=False \
+            -DENABLE_ROCBLAS_BACKEND=False \
+            -DHIPSYCL_TARGETS=cuda:sm_75 \                               # Specify the targeted device architectures 
+            -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL \
+            [-DREF_BLAS_ROOT=<reference_blas_install_prefix>]            # required only for testing
    cmake --build .
    ctest
    cmake --install . --prefix <path_to_install_dir>
@@ -361,7 +396,7 @@ With the AMD rocBLAS backend:
             -DENABLE_MKLGPU_BACKEND=False                       # disable Intel MKL GPU backend
             -DENABLE_ROCBLAS_BACKEND=True                     \
             -DTARGET_DOMAINS=blas                               # hipSYCL only supports the BLAS domain
-            -DHIPSYCL_TARGETS=omp\;hip:gfx906                   # Specify the targetted device architectures 
+            -DHIPSYCL_TARGETS=omp\;hip:gfx906                   # Specify the targeted device architectures 
             -DONEMKL_SYCL_IMPLEMENTATION=hipSYCL                # Use the hipSYCL cmake integration
             [-DREF_BLAS_ROOT=<reference_blas_install_prefix>]   # required only for testing
    cmake --build .
