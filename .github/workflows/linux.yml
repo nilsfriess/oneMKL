@@ -82,7 +82,7 @@ jobs:
         cd oneMKL
         mkdir build
         cd build
-        cmake -DCMAKE_LIBRARY_PATH="/opt/cuda/lib64/stubs" \
+        LD_LIBRARY_PATH="/opt/cuda/lib64/stubs" cmake -DCMAKE_LIBRARY_PATH="/opt/cuda/lib64/stubs" \
               -DENABLE_CUBLAS_BACKEND=True \
               -DENABLE_MKLGPU_BACKEND=False \
               -DENABLE_MKLCPU_BACKEND=False \
